@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -28,7 +29,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <Link href="/" style={{ fontWeight: 700, letterSpacing: -0.2 }}>
+            <Link href="/" style={{ fontWeight: 800, letterSpacing: -0.2, display: "flex", alignItems: "center", gap: 10 }}>
+              <Image
+                src="/paperProtocolLogo.png"
+                alt="$PAPER"
+                width={28}
+                height={28}
+                priority
+                style={{ borderRadius: 8 }}
+              />
               PAPER Protocol
             </Link>
             <nav style={{ display: "flex", gap: 12, opacity: 0.9 }}>
