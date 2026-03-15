@@ -25,6 +25,11 @@ export default function MineClient() {
   const sessionId = useMemo(() => getSessionId(), []);
 
   const [points, setPoints] = useState<number>(0);
+  const [today, setToday] = useState<string>("");
+  const [remaining, setRemaining] = useState<number>(0);
+  const [dailyCap, setDailyCap] = useState<number>(25);
+  const [streak, setStreak] = useState<number>(0);
+  const [multiplier, setMultiplier] = useState<number>(1);
   const [challenge, setChallenge] = useState<Challenge | null>(null);
   const [artifact, setArtifact] = useState<string>("");
   const [status, setStatus] = useState<string>("");
@@ -33,7 +38,14 @@ export default function MineClient() {
   async function refreshMe() {
     const res = await fetch(`/api/paper/me?sessionId=${encodeURIComponent(sessionId)}`);
     const j = await res.json();
-    if (j?.ok) setPoints(j.me.points || 0);
+    if (j?.ok) {
+      setPoints(j.me.points || 0);
+      setToday(j.me.today || "");
+      setDailyCap(j.me.dailyCap || 25);
+      setRemaining(j.me.remaining ?? 0);
+      setStreak(j.me.streak ?? 0);
+      setMultiplier(Number(j.me.multiplier || 1));
+    }
   }
 
   async function newChallenge() {
@@ -45,7 +57,11 @@ export default function MineClient() {
     });
     const j = await res.json();
     if (!j?.ok) {
-      setStatus(`Challenge failed: ${j?.error || "unknown"}`);
+      if (j?.error === "daily_cap") {
+        setStatus(`Daily cap reached. Come back tomorrow. (${remaining}/${dailyCap} remaining)`);
+      } else {
+        setStatus(`Challenge failed: ${j?.error || "unknown"}`);
+      }
       return;
     }
     setChallenge(j.challenge);
@@ -105,6 +121,23 @@ export default function MineClient() {
   return (
     <div style={{ display: "grid", gap: 14 }}>
       <MintMachineHero printing={printing} />
+
+      <div className="card">
+        <div className="kicker">Today</div>
+        <div className="cardTitle">Daily cap + streak</div>
+        <div className="cardBody" style={{ display: "grid", gap: 6 }}>
+          <div>
+            Challenges remaining: <b>{remaining}</b> / {dailyCap}
+            {today ? <span style={{ opacity: 0.75 }}> (day: {today})</span> : null}
+          </div>
+          <div>
+            Streak: <b>{streak}</b> · Multiplier: <b>{multiplier.toFixed(1)}x</b>
+          </div>
+          <div style={{ opacity: 0.8 }}>
+            Correct answers increase your multiplier. A miss resets streak to 0.
+          </div>
+        </div>
+      </div>
 
       <div className="card">
         <div className="kicker">Your balance</div>
